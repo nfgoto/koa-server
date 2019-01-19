@@ -18,19 +18,12 @@ app.context.userData = {
 app.use(
     // ctx = main object containing req and res objects
     ctx => {
-        const { state, request } = ctx;
-        // use state
-        state.user = 'Florian';
+        const { state, request, response, userData } = ctx;
 
-        // using request object
-        const method = request.method;
-        let from = request.origin;
-        
-        console.log(`${method} ${from}`)
-
-        // print to browser, body is alias for ctx.response.body
-        ctx.body = `Welcone to Koa, ${ctx.userData.fullname}! 
-        It is ${ctx.linuxDate} aka ${ctx.humanReadableDate}`;
+        !userData.fullname
+            ? response.body = userData
+            // will print message to body
+            : ctx.throw(404, 'No user found');
     }
 
 );
