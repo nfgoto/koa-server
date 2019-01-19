@@ -17,13 +17,15 @@ app.context.userData = {
 // response handler
 app.use(
     // ctx = main object containing req and res objects
-    ctx => {
+    async (ctx) => {
         const { state, request, response, userData } = ctx;
 
-        !userData.fullname
-            ? response.body = userData
-            // will print message to body
-            : ctx.throw(404, 'No user found');
+        try {
+            return response.body = await userData;
+        } catch (error) {
+            ctx.throw(404, 'No user found\n' + error.message);
+        }
+
     }
 
 );
