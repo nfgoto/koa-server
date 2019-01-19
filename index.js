@@ -11,24 +11,43 @@ app.context.userData = {
     get fullname() {
         return `${this.firstname} ${this.lastname}`
     }
-
 }
 
-// response handler
+// cacscading middleware pattern
+
+// log middleware
 app.use(
-    // ctx = main object containing req and res objects
-    async (ctx) => {
-        const { state, request, response, userData } = ctx;
+    async (ctx, next) => {
+        // pass to next middleare
+        await next();
 
-        try {
-            return response.body = await userData;
-        } catch (error) {
-            ctx.throw(404, 'No user found\n' + error.message);
-        }
-
+        const responseTime = ctx.response.get('X-Response-Time');
+        console.log(`${ctx.request.method} ${ctx.request.url} - ${responseTime} `);
     }
-
 );
+
+app.use(
+    async (ctx, next) => {
+        const responseTime = ctx.response.get('X-Response-Time');
+        const start = Date.now();
+
+        // pass to next middleare
+        await next();
+
+        const duration = Date.now() - start;
+        ctx.set('X-Response-Time', `${duration}ms`);
+
+        console.log(`${ctx.request.method} ${ctx.request.url} - ${responseTime} `);
+    }
+);
+
+app.use(
+    async (ctx) => {
+        ctx.response.body = await ctx.userData;
+    }
+);
+
+
 
 
 app.listen(PORT, () => {
